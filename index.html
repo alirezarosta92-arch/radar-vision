@@ -3,253 +3,214 @@
 <html lang="fa" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RADAR VISION</title>
 
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3"></script>
 
 <style>
-* { box-sizing: border-box; }
-
-body {
-  margin: 0;
-  padding: 16px;
-  background: #07111c;
-  color: #00eac0;
-  font-family: Tahoma, Arial, sans-serif;
-  text-align: center;
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:#07111d;
+  color:#e7f7ff;
+  font-family:Tahoma,Arial;
+  text-align:center;
+  padding:18px;
 }
-
-h1 {
-  letter-spacing: 2px;
-  margin-bottom: 5px;
+h1{color:#00e5ff;letter-spacing:2px}
+.panel{
+  max-width:650px;
+  margin:15px auto;
+  padding:15px;
+  background:#102337;
+  border:1px solid #087e9c;
+  border-radius:15px;
 }
-
-.panel {
-  max-width: 750px;
-  margin: 15px auto;
-  padding: 15px;
-  background: #102333;
-  border: 1px solid #00a98a;
-  border-radius: 15px;
+video{
+  width:100%;
+  max-width:600px;
+  background:#000;
+  border-radius:12px;
 }
-
-video {
-  width: 100%;
-  background: black;
-  border-radius: 12px;
-  margin-top: 12px;
+button,select{
+  padding:12px;
+  margin:6px;
+  border:0;
+  border-radius:8px;
+  background:#00bcd4;
+  color:#00121c;
+  font-weight:bold;
+  font-size:15px;
 }
-
-button, select {
-  padding: 12px;
-  margin: 5px;
-  border: 1px solid #00eac0;
-  border-radius: 8px;
-  background: #123a49;
-  color: white;
-  font-size: 14px;
+button:active{background:#80deea}
+#status{color:#00e5ff}
+#results{
+  text-align:right;
+  line-height:2;
+  overflow-wrap:anywhere;
 }
-
-button {
-  cursor: pointer;
+.item{
+  background:#173c50;
+  margin:7px 0;
+  padding:10px;
+  border-radius:8px;
 }
-
-button:active {
-  background: #087b69;
-}
-
-#status {
-  padding: 12px;
-  background: #071923;
-  border-radius: 8px;
-  color: white;
-  margin: 12px 0;
-}
-
-#result {
-  min-height: 75px;
-  padding: 15px;
-  background: #071923;
-  border: 1px solid #176b60;
-  border-radius: 10px;
-  margin-top: 12px;
-  color: #fff;
-  line-height: 2;
-}
-
-.small {
-  color: #91b9b5;
-  font-size: 12px;
-}
+small{color:#9bc8d8}
 </style>
 </head>
 
 <body>
 
 <h1>RADAR VISION</h1>
-<p class="small">AI OBJECT RECOGNITION</p>
+<p>سامانه آموزشی تشخیص اشیای معمولی</p>
 
 <div class="panel">
-
-  <div id="status">در حال بارگذاری مدل هوش مصنوعی...</div>
-
   <video id="video" autoplay playsinline muted></video>
+  <p id="status">در انتظار شروع...</p>
 
-  <div>
-    <button id="startBtn">شروع دوربین</button>
-    <button id="stopBtn">توقف دوربین</button>
-    <button id="testBtn">تست بوق</button>
-  </div>
+  <button id="startBtn">شروع دوربین</button>
+  <button id="stopBtn">توقف</button>
+  <button id="switchBtn">تغییر دوربین</button>
+</div>
 
-  <hr>
-
-  <p>انتخاب نوع شیء برای نمایش:</p>
+<div class="panel">
+  <h3>تنظیمات تشخیص</h3>
 
   <select id="objectSelect">
     <option value="all">همه اشیای پشتیبانی‌شده</option>
     <option value="book">کتاب</option>
-    <option value="cell phone">موبایل</option>
+    <option value="cell phone">گوشی</option>
     <option value="bottle">بطری</option>
     <option value="cup">لیوان</option>
-    <option value="chair">صندلی</option>
     <option value="laptop">لپ‌تاپ</option>
     <option value="mouse">ماوس</option>
     <option value="keyboard">کیبورد</option>
+    <option value="chair">صندلی</option>
     <option value="backpack">کوله‌پشتی</option>
-    <option value="umbrella">چتر</option>
     <option value="clock">ساعت</option>
     <option value="remote">کنترل</option>
     <option value="banana">موز</option>
     <option value="apple">سیب</option>
-    <option value="sports ball">توپ</option>
     <option value="scissors">قیچی</option>
   </select>
 
-  <br>
-
-  <p>انتخاب دوربین:</p>
-
-  <select id="cameraSelect">
-    <option value="environment">دوربین عقب</option>
-    <option value="user">دوربین جلو</option>
-  </select>
-
-  <p>سرعت بررسی تصویر:</p>
-
-  <select id="speedSelect">
-    <option value="700">آرام</option>
-    <option value="400" selected>معمولی</option>
-    <option value="250">سریع</option>
-  </select>
-
-  <div id="result">
-    هنوز شیئی شناسایی نشده است.
-  </div>
-
-  <p class="small">
-    این برنامه آموزشی است و فقط نام اشیای قابل‌شناسایی را نمایش می‌دهد.
+  <p>
+    <button id="beepBtn">تست صدای هشدار</button>
   </p>
+</div>
 
+<div class="panel">
+  <h3>نتایج شناسایی</h3>
+  <div id="results">هنوز چیزی شناسایی نشده است.</div>
 </div>
 
 <script>
 const video = document.getElementById("video");
-const statusBox = document.getElementById("status");
-const resultBox = document.getElementById("result");
+const statusText = document.getElementById("status");
+const results = document.getElementById("results");
+const objectSelect = document.getElementById("objectSelect");
 
 let model = null;
 let stream = null;
 let running = false;
-let audioContext = null;
+let cameraSide = "environment";
 let lastBeep = 0;
-let previousDetected = false;
+let scanTimer = null;
 
 const names = {
-  "book": "کتاب",
-  "cell phone": "موبایل",
-  "bottle": "بطری",
-  "cup": "لیوان",
-  "chair": "صندلی",
-  "laptop": "لپ‌تاپ",
-  "mouse": "ماوس",
-  "keyboard": "کیبورد",
-  "backpack": "کوله‌پشتی",
-  "umbrella": "چتر",
-  "clock": "ساعت",
-  "remote": "کنترل",
-  "banana": "موز",
-  "apple": "سیب",
-  "sports ball": "توپ",
-  "scissors": "قیچی"
+  "book":"کتاب",
+  "cell phone":"گوشی موبایل",
+  "bottle":"بطری",
+  "cup":"لیوان",
+  "laptop":"لپ‌تاپ",
+  "mouse":"ماوس",
+  "keyboard":"کیبورد",
+  "chair":"صندلی",
+  "backpack":"کوله‌پشتی",
+  "clock":"ساعت",
+  "remote":"کنترل",
+  "banana":"موز",
+  "apple":"سیب",
+  "scissors":"قیچی",
+  "person":"انسان",
+  "car":"ماشین",
+  "bicycle":"دوچرخه",
+  "dog":"سگ",
+  "cat":"گربه",
+  "sports ball":"توپ",
+  "tv":"تلویزیون",
+  "potted plant":"گلدان",
+  "handbag":"کیف دستی",
+  "umbrella":"چتر"
 };
 
-async function loadModel() {
-  try {
-    statusBox.textContent = "در حال آماده‌سازی هوش مصنوعی...";
+function beep(){
+  try{
+    const AudioContextClass =
+      window.AudioContext || window.webkitAudioContext;
 
+    const audio = new AudioContextClass();
+
+    if(audio.state === "suspended"){
+      audio.resume();
+    }
+
+    const oscillator = audio.createOscillator();
+    const gain = audio.createGain();
+
+    oscillator.connect(gain);
+    gain.connect(audio.destination);
+
+    oscillator.frequency.value = 850;
+    gain.gain.value = 0.15;
+
+    oscillator.start();
+    oscillator.stop(audio.currentTime + 0.18);
+
+    oscillator.onended = () => audio.close();
+  }catch(error){
+    console.log("Audio error:",error);
+  }
+}
+
+async function loadModel(){
+  if(model) return true;
+
+  statusText.textContent = "در حال بارگذاری هوش مصنوعی...";
+
+  try{
     await tf.ready();
 
     model = await cocoSsd.load({
       base: "lite_mobilenet_v2"
     });
 
-    statusBox.textContent = "مدل با موفقیت آماده شد.";
-  } catch (error) {
+    statusText.textContent = "هوش مصنوعی آماده است.";
+    return true;
+
+  }catch(error){
+    statusText.textContent = "خطا در بارگذاری مدل.";
     console.error(error);
-    statusBox.textContent =
-      "خطا در بارگذاری مدل. اتصال اینترنت را بررسی کن.";
+    return false;
   }
 }
 
-async function beep() {
-  try {
-    if (!audioContext) {
-      audioContext = new (
-        window.AudioContext ||
-        window.webkitAudioContext
-      )();
+async function startCamera(){
+  try{
+    if(!await loadModel()) return;
+
+    if(stream){
+      stream.getTracks().forEach(track => track.stop());
     }
 
-    if (audioContext.state === "suspended") {
-      await audioContext.resume();
-    }
-
-    const oscillator = audioContext.createOscillator();
-    const gain = audioContext.createGain();
-
-    oscillator.type = "sine";
-    oscillator.frequency.value = 950;
-
-    gain.gain.value = 0.15;
-
-    oscillator.connect(gain);
-    gain.connect(audioContext.destination);
-
-    oscillator.start();
-    oscillator.stop(audioContext.currentTime + 0.18);
-
-  } catch (error) {
-    console.error("Audio error:", error);
-  }
-}
-
-async function startCamera() {
-  if (!model) {
-    statusBox.textContent = "مدل هنوز آماده نشده است.";
-    return;
-  }
-
-  if (running) return;
-
-  try {
     stream = await navigator.mediaDevices.getUserMedia({
-      audio: false,
-      video: {
-        facingMode: {
-          ideal: document.getElementById("cameraSelect").value
-        }
+      audio:false,
+      video:{
+        facingMode:cameraSide,
+        width:{ideal:640},
+        height:{ideal:480}
       }
     });
 
@@ -257,114 +218,107 @@ async function startCamera() {
     await video.play();
 
     running = true;
-    previousDetected = false;
+    statusText.textContent = "دوربین فعال است؛ در حال تشخیص...";
 
-    statusBox.textContent = "دوربین روشن است؛ در حال بررسی...";
+    clearTimeout(scanTimer);
     scan();
 
-  } catch (error) {
+  }catch(error){
+    statusText.textContent =
+      "خطای دوربین؛ اجازه دسترسی دوربین را بررسی کن.";
     console.error(error);
-    statusBox.textContent =
-      "دوربین باز نشد. مجوز دوربین را بررسی کن.";
   }
 }
 
-function stopCamera() {
+function stopCamera(){
   running = false;
+  clearTimeout(scanTimer);
 
-  if (stream) {
+  if(stream){
     stream.getTracks().forEach(track => track.stop());
     stream = null;
   }
 
   video.srcObject = null;
-
-  resultBox.textContent = "بررسی متوقف شد.";
-  statusBox.textContent = "دوربین خاموش است.";
-  previousDetected = false;
+  statusText.textContent = "دوربین متوقف شد.";
 }
 
-async function scan() {
-  if (!running || !model) return;
+async function scan(){
+  if(!running || !model) return;
 
-  if (video.readyState >= 2) {
-    try {
+  if(video.readyState >= 2){
+    try{
       const predictions = await model.detect(video);
 
-      const selected =
-        document.getElementById("objectSelect").value;
+      const selected = objectSelect.value;
 
-      const found = predictions.filter(item => {
-        return item.score >= 0.55 &&
-          (selected === "all" || item.class === selected);
-      });
+      const detected = predictions.filter(item =>
+        item.score >= 0.45 &&
+        (selected === "all" || item.class === selected)
+      );
 
-      if (found.length > 0) {
-        const detectedNames = found.map(item => {
-          const faName = names[item.class] || item.class;
-          const confidence = Math.round(item.score * 100);
+      if(detected.length){
+        results.innerHTML = "";
 
-          return faName + " (" + confidence + "%)";
+        detected.forEach(item => {
+          const div = document.createElement("div");
+          div.className = "item";
+
+          const title = document.createElement("strong");
+          title.textContent =
+            names[item.class] || item.class;
+
+          const confidence = document.createElement("small");
+          confidence.textContent =
+            " — اطمینان: " +
+            Math.round(item.score * 100) + "%";
+
+          div.appendChild(title);
+          div.appendChild(confidence);
+          results.appendChild(div);
         });
 
-        resultBox.textContent =
-          "اشیای شناسایی‌شده: " +
-          [...new Set(detectedNames)].join("، ");
+        statusText.textContent =
+          detected.length + " مورد شناسایی شد.";
 
         const now = Date.now();
 
-        if (!previousDetected && now - lastBeep > 1200) {
-          await beep();
+        if(now - lastBeep > 1800){
+          beep();
           lastBeep = now;
         }
 
-        previousDetected = true;
-
-        statusBox.textContent = "شناسایی انجام شد.";
-
-      } else {
-        resultBox.textContent =
-          "شیء انتخاب‌شده شناسایی نشد.";
-
-        previousDetected = false;
-        statusBox.textContent = "در حال بررسی تصویر...";
+      }else{
+        results.textContent = "شیء انتخاب‌شده شناسایی نشد.";
+        statusText.textContent = "در حال جست‌وجوی اشیا...";
       }
 
-    } catch (error) {
+    }catch(error){
       console.error(error);
-      statusBox.textContent = "خطا در بررسی تصویر.";
     }
   }
 
-  if (running) {
-    const delay = Number(
-      document.getElementById("speedSelect").value
-    );
-
-    setTimeout(scan, delay);
+  if(running){
+    scanTimer = setTimeout(scan,250);
   }
 }
 
-document.getElementById("startBtn")
-  .addEventListener("click", startCamera);
+document.getElementById("startBtn").onclick = startCamera;
 
-document.getElementById("stopBtn")
-  .addEventListener("click", stopCamera);
+document.getElementById("stopBtn").onclick = stopCamera;
 
-document.getElementById("testBtn")
-  .addEventListener("click", beep);
+document.getElementById("switchBtn").onclick = async () => {
+  cameraSide =
+    cameraSide === "environment" ? "user" : "environment";
 
-document.getElementById("cameraSelect")
-  .addEventListener("change", async () => {
-    if (running) {
-      stopCamera();
-      await startCamera();
-    }
-  });
+  if(running){
+    await startCamera();
+  }
+};
 
-window.addEventListener("beforeunload", stopCamera);
+document.getElementById("beepBtn").onclick = beep;
 
-loadModel();
+window.addEventListener("beforeunload",stopCamera);
 </script>
 
 </body>
